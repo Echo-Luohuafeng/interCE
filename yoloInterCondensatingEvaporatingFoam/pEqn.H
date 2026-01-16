@@ -63,4 +63,6 @@
         );
         p_rgh = p - rho*gh;
     }
+    
+    #include "continuityError.H"
 }
