@@ -18,6 +18,7 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude
 
 EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
     -lfiniteVolume \
     -lfvOptions \
     -lmeshTools \
