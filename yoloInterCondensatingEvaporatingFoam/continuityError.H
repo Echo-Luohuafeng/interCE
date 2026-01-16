@@ -2,9 +2,9 @@
 // volScalarField contErr(fvc::ddt(rho) + fvc::div(rhoPhi));
 
 
-Pair<tmp<volScalarField>> vDot = mixture->vDot();
-const volScalarField& vDotc = vDot[0]();
-const volScalarField& vDotv = vDot[1]();
+// Pair<tmp<volScalarField>> vDot = mixture->vDot();
+// const volScalarField& vDotc = vDot[0]();
+// const volScalarField& vDotv = vDot[1]();
 
 
 
