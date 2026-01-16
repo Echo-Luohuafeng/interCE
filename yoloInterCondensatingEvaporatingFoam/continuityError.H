@@ -8,7 +8,7 @@
 
 
 
-volScalarField contErr(fvc::div(phi) + vDotc+ vDotv );
+volScalarField contErr(fvc::div(phi) - vDotc - vDotv );
 
 scalar sumLocalContErr = runTime.deltaTValue()*
     mag(contErr)().weightedAverage(mesh.V()).value();
