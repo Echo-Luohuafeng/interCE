@@ -153,12 +153,20 @@ Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 vDotAlphal() const
 {
+    // dimensionedScalar alphalCoeff(1.0/mixture_.rho1());
+
+    // return Pair<tmp<volScalarField>>
+    // (
+    //     (alphalCoeff*mDotc_)/(mixture_.alpha2() + SMALL),
+    //    -(alphalCoeff*mDote_)/(mixture_.alpha1() + SMALL)
+    // );
+
     dimensionedScalar alphalCoeff(1.0/mixture_.rho1());
 
     return Pair<tmp<volScalarField>>
     (
-        (alphalCoeff*mDotc_)/(mixture_.alpha2() + SMALL),
-       -(alphalCoeff*mDote_)/(mixture_.alpha1() + SMALL)
+        (alphalCoeff*mDotc_)/(mixture_.alpha2() + SMALL)*0,
+       -(alphalCoeff*mDote_)/(mixture_.alpha1() + SMALL)*0
     );
 }
 
@@ -334,13 +342,19 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 vDot() const
 {
 
-    dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
+    // dimensionedScalar pCoeff(1.0/mixture_.rho1() - 1.0/mixture_.rho2());
+
+    const volScalarField& alpha1 = mixture_.alpha1();
+    const volScalarField& alpha2 = mixture_.alpha2();
+    volScalarField pCoeff( -1.0 / ( alpha1 * mixture_.rho1() + alpha2 * mixture_.rho2() )   );
 
     return Pair<tmp<volScalarField>>
     (
         pCoeff*mDotcSpread_,
        -pCoeff*mDoteSpread_
     );
+
+
 }
 
 
