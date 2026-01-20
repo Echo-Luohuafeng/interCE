@@ -269,14 +269,14 @@ correct()
     mDote_ = interfaceArea_*R_*max(T - TSat, T0)/L;
 
     // SXD add :
-    forAll(mDotc_, celli)
-    {
-        scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
-        scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
-        scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative
-        mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
-        mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
-    }
+    // forAll(mDotc_, celli)
+    // {
+    //     scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
+    //     scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
+    //     scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative
+    //     mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
+    //     mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
+    // }
 
     // Calculate the spread sources
     dimensionedScalar D

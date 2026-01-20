@@ -5,14 +5,25 @@
     const dimensionedScalar Cp1 = thermo->Cp1();
     const dimensionedScalar Cp2 = thermo->Cp2();
 
-    rhoCp = rho*cp;
+    //SXD fixed :
+    //rhoCp = rho*cp;
+    rhoCp = alpha1*rho1*Cp1 + alpha2*rho2*Cp2;
+
+
 
     kappaEff = thermo->kappa() + rho*cp*turbulence->nut()/Prt;
+
+    //SXD fixed :
+    // const surfaceScalarField rhoCpPhi
+    // (
+    //     "rhoCpPhi",
+    //     rhoPhi*(Cp1 - Cp2) + phi*rho2*Cp2
+    // );
 
     const surfaceScalarField rhoCpPhi
     (
         "rhoCpPhi",
-        rhoPhi*(Cp1 - Cp2) + phi*rho2*Cp2
+        alphaPhi10*(rho1*Cp1 - rho2*Cp2) + phi*rho2*Cp2
     );
 
     fvScalarMatrix TEqn
