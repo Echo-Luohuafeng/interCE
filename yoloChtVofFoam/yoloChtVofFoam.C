@@ -112,11 +112,11 @@ int main(int argc, char *argv[])
 
             forAll(fluidRegions, i)
             {
-                fvMesh& mesh = fluidRegions[i];
+                // fvMesh& mesh = fluidRegions[i];
 
-                #include "readFluidMultiRegionPIMPLEControls.H"
-                #include "setRegionFluidFields.H"
-                #include "solveFluid.H"
+                // #include "readFluidMultiRegionPIMPLEControls.H"
+                // #include "setRegionFluidFields.H"
+                // #include "solveFluid.H"
             }
 
             forAll(solidRegions, i)
@@ -127,7 +127,8 @@ int main(int argc, char *argv[])
                 #include "setRegionSolidFields.H"
                 #include "solveSolid.H"
             }
-            
+        }
+
 
         runTime.write();
 

@@ -1,8 +1,6 @@
 EXE_INC = \
     -I./fluid \
     -I./solid \
-    -I./porousFluid \
-    -I./porousSolid \
     -I./include \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
