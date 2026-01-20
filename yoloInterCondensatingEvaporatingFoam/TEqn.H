@@ -1,6 +1,6 @@
 {
-    tmp<volScalarField> tcp(thermo->Cp());
-    const volScalarField& cp = tcp();
+    // tmp<volScalarField> tcp(thermo->Cp());
+    // const volScalarField& cp = tcp();
 
     const dimensionedScalar Cp1 = thermo->Cp1();
     const dimensionedScalar Cp2 = thermo->Cp2();
@@ -11,7 +11,7 @@
 
 
 
-    kappaEff = thermo->kappa() + rho*cp*turbulence->nut()/Prt;
+    kappaEff = thermo->kappa() + rhoCp*turbulence->nut()/Prt;
 
     //SXD fixed :
     // const surfaceScalarField rhoCpPhi
