@@ -49,7 +49,7 @@ Description
 #include "localEulerDdtScheme.H"
 #include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
-#include "interfaceProperties.H"
+#include "yoloInterfaceProperties.H"
 #include "twoPhaseMixtureEThermo.H"
 #include "temperaturePhaseChangeTwoPhaseMixture.H"
 #include "turbulentTransportModel.H"

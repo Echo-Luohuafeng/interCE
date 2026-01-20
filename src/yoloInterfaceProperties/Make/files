@@ -1,0 +1,4 @@
+yoloInterfaceProperties.C
+
+
+LIB = $(FOAM_USER_LIBBIN)/libyoloInterfaceProperties

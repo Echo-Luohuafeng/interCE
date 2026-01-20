@@ -76,7 +76,7 @@ surfaceScalarField rhoPhi
 );
 
 // Construct interface from alpha1 distribution
-interfaceProperties interface
+Yolo::interfaceProperties interface
 (
     alpha1,
     U,
