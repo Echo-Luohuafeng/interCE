@@ -55,6 +55,21 @@ Description
 #include "pressureControl.H"
 
 
+#include "dynamicFvMesh.H"
+#include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
+#include "subCycle.H"
+#include "yoloInterfaceProperties.H"
+#include "twoPhaseMixtureEThermo.H"
+#include "temperaturePhaseChangeTwoPhaseMixture.H"
+#include "turbulentTransportModel.H"
+#include "turbulenceModel.H"
+#include "pimpleControl.H"
+#include "CorrectPhi.H"
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
