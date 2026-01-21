@@ -1,4 +1,4 @@
-if (pimple.firstIter() || moveMeshOuterCorrectors)
+if (oCorr == 0 )
 {
     volScalarField divU("divU", fvc::div(fvc::absolute(phi, U)));
 
