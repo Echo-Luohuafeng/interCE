@@ -127,10 +127,10 @@ int main(int argc, char *argv[])
 
             forAll(fluidRegions, i)
             {
-                // fvMesh& mesh = fluidRegions[i];
+                fvMesh& mesh = fluidRegions[i];
 
-                // #include "readFluidMultiRegionPIMPLEControls.H"
-                // #include "setRegionFluidFields.H"
+                #include "readFluidMultiRegionPIMPLEControls.H"
+                #include "setRegionFluidFields.H"
                 // #include "solveFluid.H"
             }
 

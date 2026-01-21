@@ -20,7 +20,14 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionFaModels/lnInclude \
     -I$(modelBase)/yoloInterCondensatingEvaporatingFoam/temperaturePhaseChangeTwoPhaseMixtures/lnInclude \
-    -I$(modelBase)/src/yoloInterfaceProperties/lnInclude 
+    -I$(modelBase)/src/yoloInterfaceProperties/lnInclude \
+    -I$(LIB_SRC)/fvOptions/lnInclude\
+    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
+    -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude
 
 
 EXE_LIBS = \
@@ -44,4 +51,10 @@ EXE_LIBS = \
     -lregionFaModels \
     -lfiniteArea \ 
     -L$(FOAM_USER_LIBBIN) \
-    -lyoloInterfaceProperties
+    -lyoloInterfaceProperties \
+    -ldynamicFvMesh \
+    -lyoloPhaseTemperatureChangeTwoPhaseMixtures \
+    -ltwoPhaseMixture \
+    -ltwoPhaseProperties \
+    -lturbulenceModels \
+    -lfluidThermophysicalModels

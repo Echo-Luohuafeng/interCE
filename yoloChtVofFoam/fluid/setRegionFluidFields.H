@@ -1,67 +1,83 @@
-    CombustionModel<rhoReactionThermo>& reaction = reactionFluid[i];
+twoPhaseMixtureEThermo& thermo = thermoFluid[i];
+    
+temperaturePhaseChangeTwoPhaseMixture& mixture = mixtureFluid[i];
 
-    rhoReactionThermo& thermo = reaction.thermo();
-    thermo.validate(args.executable(), "h", "e");
+volScalarField& alpha1 = thermo.alpha1();
+volScalarField& alpha2 = thermo.alpha2();
 
-    basicMultiComponentMixture& composition = thermo.composition();
-    PtrList<volScalarField>& Y = composition.Y();
+const dimensionedScalar& rho1 = thermo.rho1();
+const dimensionedScalar& rho2 = thermo.rho2();
 
-    label inertIndex = -1;
-    if (Y.size())
-    {
-        const word inertSpecie(thermo.get<word>("inertSpecie"));
-        inertIndex = composition.species().find(inertSpecie);
-        if (inertIndex < 0)
-        {
-            FatalIOErrorIn(args.executable().c_str(), thermo)
-                << "Inert specie " << inertSpecie
-                << " not found in available species "
-                << flatOutput(composition.species())
-                << exit(FatalIOError);
-        }
-    }
+volScalarField& rho = rhoFluid[i];
+volVectorField& U = UFluid[i];
+surfaceScalarField& phi = phiFluid[i];
+surfaceScalarField& rhoPhi = rhoPhiFluid[i];
 
-    volScalarField& rho = rhoFluid[i];
-    volVectorField& U = UFluid[i];
-    surfaceScalarField& phi = phiFluid[i];
+Yolo::interfaceProperties& interface = interfaceFluid[i];
+    
+incompressible::turbulenceModel& turbulence = turbulenceFluid[i];
 
-    compressible::turbulenceModel& turbulence = turbulenceFluid[i];
-    volScalarField& K = KFluid[i];
-    volScalarField& dpdt = dpdtFluid[i];
+volScalarField& p = thermo.p();
+volScalarField& p_rgh = p_rghFluid[i];
 
-    volScalarField& p = thermo.p();
-    const volScalarField& psi = thermo.psi();
+const volScalarField& gh = ghFluid[i];
+const surfaceScalarField& ghf = ghfFluid[i];
 
-    volScalarField& p_rgh = p_rghFluid[i];
+dimensionedScalar& Prt = PrtFluid[i];
+volScalarField& kappaEff = kappaEffFluid[i];
+volScalarField& rhoCp = rhoCpFluid[i];
 
-    const volScalarField& gh = ghFluid[i];
-    const surfaceScalarField& ghf = ghfFluid[i];
+IOMRFZoneList& MRF = MRFfluid[i];
+fv::options& fvOptions = fluidFvOptions[i];
 
-    multivariateSurfaceInterpolationScheme<scalar>::fieldTable& fields =
-        fieldsFluid[i];
+bool frozenFlow = false;
+fluidRegions[i].solutionDict().subDict("PIMPLE").readIfPresent("frozenFlow", frozenFlow);
 
-    volScalarField& Qdot = QdotFluid[i];
+const label pRefCell = pRefCellFluid[i];
+const scalar pRefValue = pRefValueFluid[i];
 
-    radiation::radiationModel& rad = radiation[i];
+volScalarField& T = thermo->T();
 
-    IOMRFZoneList& MRF = MRFfluid[i];
-    fv::options& fvOptions = fluidFvOptions[i];
 
-    fvVectorMatrix& UEqn = UEqFluid[i];
 
-    const dimensionedScalar initialMass
+IOobject alphaPhi10Header
+(
+    IOobject::groupName("alphaPhi0", alpha1.group()),
+    runTime.timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+);
+
+const bool alphaRestart =
+    alphaPhi10Header.typeHeaderOk<surfaceScalarField>(true);
+
+if (alphaRestart)
+{
+    Info << "Restarting alpha" << endl;
+}
+
+// MULES flux from previous time-step
+surfaceScalarField alphaPhi10
+(
+    alphaPhi10Header,
+    phi*fvc::interpolate(alpha1)
+);
+
+// MULES Correction
+tmp<surfaceScalarField> talphaPhi1Corr0;
+
+// MULES compressed flux is registered in case scalarTransport FO needs it.
+surfaceScalarField alphaPhiUn
+(
+    IOobject
     (
-        "initialMass",
-        dimMass,
-        initialMassFluid[i]
-    );
-
-    bool frozenFlow = frozenFlowFluid[i];
-
-    const label pRefCell = pRefCellFluid[i];
-    const scalar pRefValue = pRefValueFluid[i];
-
-    const dimensionedScalar rhoMax = rhoMaxFluid[i];
-    const dimensionedScalar rhoMin = rhoMinFluid[i];
-
-    const pressureControl& pressureControl = pressureControls[i];
+        "alphaPhiUn",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar(phi.dimensions(), Zero)
+);
