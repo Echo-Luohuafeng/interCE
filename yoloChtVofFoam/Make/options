@@ -1,3 +1,4 @@
+modelBase = ../
 EXE_INC = \
     -I./fluid \
     -I./solid \
@@ -17,7 +18,9 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
-    -I$(LIB_SRC)/regionFaModels/lnInclude
+    -I$(LIB_SRC)/regionFaModels/lnInclude \
+    -I$(modelBase)/yoloInterCondensatingEvaporatingFoam/temperaturePhaseChangeTwoPhaseMixtures/lnInclude \
+    -I$(modelBase)/src/yoloInterfaceProperties/lnInclude 
 
 
 EXE_LIBS = \
@@ -39,4 +42,6 @@ EXE_LIBS = \
     -lradiationModels \
     -lregionModels \
     -lregionFaModels \
-    -lfiniteArea
+    -lfiniteArea \ 
+    -L$(FOAM_USER_LIBBIN) \
+    -lyoloInterfaceProperties
