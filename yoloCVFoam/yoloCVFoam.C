@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019,2022 OpenCFD Ltd.
+    Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,18 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "turbulentFluidThermoModel.H"
-#include "rhoReactionThermo.H"
-#include "CombustionModel.H"
+#include "dynamicFvMesh.H"
+#include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
+#include "subCycle.H"
+#include "incompressibleTwoPhaseMixture.H"
+#include "turbulentTransportModel.H"
+#include "pimpleControl.H"
+#include "fvOptions.H"
+#include "CorrectPhi.H"
+#include "fvcSmooth.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
 #include "compressibleCourantNo.H"
@@ -53,21 +62,12 @@ Description
 #include "coordinateSystem.H"
 #include "loopControl.H"
 #include "pressureControl.H"
+#include "processorFvPatchFields.H"
+#include "isoAdvection.H"
+#include "cutFaceIso.H"
+#include "interfacePropertiesBoiling.H"
+#include "volPointInterpolation.H"
 
-
-#include "dynamicFvMesh.H"
-#include "CMULES.H"
-#include "EulerDdtScheme.H"
-#include "localEulerDdtScheme.H"
-#include "CrankNicolsonDdtScheme.H"
-#include "subCycle.H"
-#include "yoloInterfaceProperties.H"
-#include "twoPhaseMixtureEThermo.H"
-#include "temperaturePhaseChangeTwoPhaseMixture.H"
-#include "turbulentTransportModel.H"
-#include "turbulenceModel.H"
-#include "pimpleControl.H"
-#include "CorrectPhi.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Transient solver for VOF fluid flow and solid heat"
+        "Transient solver for buoyant, turbulent fluid flow and solid heat"
         " conduction with conjugate heat transfer"
         " between solid and fluid regions."
     );
@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
     #define CREATE_MESH createMeshesPostProcess.H
     #include "postProcess.H"
 
-    #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMeshes.H"
@@ -96,7 +95,6 @@ int main(int argc, char *argv[])
     #include "compressibleMultiRegionCourantNo.H"
     #include "solidRegionDiffusionNo.H"
     #include "setInitialMultiRegionDeltaT.H"
-
 
     while (runTime.run())
     {
@@ -127,27 +125,35 @@ int main(int argc, char *argv[])
 
             forAll(fluidRegions, i)
             {
-                fvMesh& mesh = fluidRegions[i];
-
-                #include "readFluidMultiRegionPIMPLEControls.H"
+                Info<< "\nSolving for fluid region "
+                    << fluidRegions[i].name() << endl;
                 #include "setRegionFluidFields.H"
+                #include "readFluidMultiRegionPIMPLEControls.H"
                 #include "solveFluid.H"
             }
 
             forAll(solidRegions, i)
             {
-                fvMesh& mesh = solidRegions[i];
-
-                #include "readSolidMultiRegionPIMPLEControls.H"
+                Info<< "\nSolving for solid region "
+                    << solidRegions[i].name() << endl;
                 #include "setRegionSolidFields.H"
+                #include "readSolidMultiRegionPIMPLEControls.H"
                 #include "solveSolid.H"
             }
-        }
 
+        }
 
         runTime.write();
 
         runTime.printExecutionTime(Info);
+
+        if(stopWhenConverged && converged)
+        {
+            Info<< "All fluxes are converged."
+                << "The simulation ends here." << endl;
+
+            runTime.writeAndEnd();
+        }
     }
 
     Info<< "End\n" << endl;

@@ -1,5 +1,5 @@
 twoPhaseMixtureEThermo& thermo = thermoFluid[i];
-    
+
 temperaturePhaseChangeTwoPhaseMixture& mixture = mixtureFluid[i];
 
 volScalarField& alpha1 = thermo.alpha1();
@@ -14,7 +14,7 @@ surfaceScalarField& phi = phiFluid[i];
 surfaceScalarField& rhoPhi = rhoPhiFluid[i];
 
 Yolo::interfaceProperties& interface = interfaceFluid[i];
-    
+
 incompressible::turbulenceModel& turbulence = turbulenceFluid[i];
 
 volScalarField& p = thermo.p();
@@ -36,7 +36,7 @@ fluidRegions[i].solutionDict().subDict("PIMPLE").readIfPresent("frozenFlow", fro
 const label pRefCell = pRefCellFluid[i];
 const scalar pRefValue = pRefValueFluid[i];
 
-volScalarField& T = thermo->T();
+volScalarField& T = thermo.T();
 
 
 

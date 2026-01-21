@@ -1,4 +1,4 @@
-// Initialise fluid field pointer lists 
+// Initialise fluid field pointer lists
 PtrList<volScalarField> p_rghFluid(fluidRegions.size());
 PtrList<volVectorField> UFluid(fluidRegions.size());
 PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
@@ -21,6 +21,8 @@ List<label> pRefCellFluid(fluidRegions.size(), 0);
 List<scalar> pRefValueFluid(fluidRegions.size(), 0.0);
 
 const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
+
+List<bool> frozenFlowFluid(fluidRegions.size(), false);
 
 
 forAll(fluidRegions, i)
@@ -133,7 +135,7 @@ forAll(fluidRegions, i)
 
     volScalarField& p = thermoFluid[i].p();
     setRefCell(p, p_rghFluid[i], fluidRegions[i].solutionDict().subDict("PIMPLE"), pRefCellFluid[i], pRefValueFluid[i]);
-    
+
     if (p_rghFluid[i].needReference())
     {
         p += dimensionedScalar("p", p.dimensions(), pRefValueFluid[i] - getRefCellValue(p, pRefCellFluid[i]));
@@ -169,5 +171,3 @@ forAll(fluidRegions, i)
     );
     rhoCpFluid[i].oldTime();
 }
-
-
