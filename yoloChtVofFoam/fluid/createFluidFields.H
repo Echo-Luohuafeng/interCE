@@ -1,23 +1,40 @@
 // Initialise fluid field pointer lists
 PtrList<volScalarField> p_rghFluid(fluidRegions.size());
+
 PtrList<volVectorField> UFluid(fluidRegions.size());
+
 PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
+
 PtrList<twoPhaseMixtureEThermo> thermoFluid(fluidRegions.size());
+
 PtrList<temperaturePhaseChangeTwoPhaseMixture> mixtureFluid(fluidRegions.size());
+
 PtrList<volScalarField> rhoFluid(fluidRegions.size());
+
 PtrList<surfaceScalarField> rhoPhiFluid(fluidRegions.size());
+
 PtrList<Yolo::interfaceProperties> interfaceFluid(fluidRegions.size());
+
 PtrList<incompressible::turbulenceModel> turbulenceFluid(fluidRegions.size());
+
 PtrList<uniformDimensionedScalarField> hRefFluid(fluidRegions.size());
+
 PtrList<volScalarField> ghFluid(fluidRegions.size());
+
 PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
+
 PtrList<IOMRFZoneList> MRFfluid(fluidRegions.size());
+
 PtrList<fv::options> fluidFvOptions(fluidRegions.size());
+
 PtrList<dimensionedScalar> PrtFluid(fluidRegions.size());
+
 PtrList<volScalarField> kappaEffFluid(fluidRegions.size());
+
 PtrList<volScalarField> rhoCpFluid(fluidRegions.size());
 
 List<label> pRefCellFluid(fluidRegions.size(), 0);
+
 List<scalar> pRefValueFluid(fluidRegions.size(), 0.0);
 
 const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
@@ -75,6 +92,7 @@ forAll(fluidRegions, i)
 
     const volScalarField& alpha1 = thermoFluid[i].alpha1();
     const volScalarField& alpha2 = thermoFluid[i].alpha2();
+    
     const dimensionedScalar& rho1 = thermoFluid[i].rho1();
     const dimensionedScalar& rho2 = thermoFluid[i].rho2();
 

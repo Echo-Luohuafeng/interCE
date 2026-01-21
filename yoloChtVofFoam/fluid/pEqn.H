@@ -1,92 +1,59 @@
-bool closedVolume = p_rgh.needReference();
-dimensionedScalar compressibility = fvc::domainIntegrate(psi);
-bool compressible = (compressibility.value() > SMALL);
-
-rho = thermo.rho();
-
-// Thermodynamic density needs to be updated by psi*d(p) after the
-// pressure solution
-const volScalarField psip0(psi*p);
-
-volScalarField rAU("rAU", 1.0/UEqn.A());
-surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
-volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
-
-surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
-
-surfaceScalarField phiHbyA
-(
-    "phiHbyA",
-    (
-        fvc::flux(rho*HbyA)
-      + MRF.zeroFilter(rhorAUf*fvc::ddtCorr(rho, U, phi))
-    )
-  + phig
-);
-
-MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
-
-// Update the pressure BCs to ensure flux consistency
-constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
-
 {
-    fvScalarMatrix p_rghDDtEqn
+    volScalarField rAU("rAU", 1.0/UEqn.A());
+    surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
+    volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
+    surfaceScalarField phiHbyA
     (
-        fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
-      + fvc::div(phiHbyA)
+        "phiHbyA",
+        (fvc::interpolate(HbyA) & mesh.Sf())
+      + fvc::interpolate(rho*rAU)*fvc::ddtCorr(U, phi)
+    );
+    adjustPhi(phiHbyA, U, p_rgh);
+
+    surfaceScalarField phig
+    (
+        (
+            interface.surfaceTensionForce()
+          - ghf*fvc::snGrad(rho)
+        )*rAUf*mesh.magSf()
     );
 
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    phiHbyA += phig;
+
+    // Update the pressure BCs to ensure flux consistency
+    constrainPressure(p_rgh, U, phiHbyA, rAUf);
+
+    Pair<tmp<volScalarField>> vDot = mixture->vDot();
+    const volScalarField& vDotc = vDot[0]();
+    const volScalarField& vDotv = vDot[1]();
+
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
-            p_rghDDtEqn
-          - fvm::laplacian(rhorAUf, p_rgh)
+            fvc::div(phiHbyA)
+          - fvm::laplacian(rAUf, p_rgh)
+          ==
+            vDotv + vDotc
         );
 
-        p_rghEqn.setReference
-        (
-            pRefCell,
-            compressible ? getRefCellValue(p_rgh, pRefCell) : pRefValue
-        );
+        p_rghEqn.setReference(pRefCell, pRefValue);
 
-        p_rghEqn.solve
-        (
-            p_rgh.select
-            (
-                (
-                    oCorr == nOuterCorr-1
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-            )
-        );
+        p_rghEqn.solve(p_rgh.select(pimple.finalInnerIter()));
 
-        if (nonOrth == nNonOrthCorr)
+        if (pimple.finalNonOrthogonalIter())
         {
             phi = phiHbyA + p_rghEqn.flux();
 
-            p_rgh.relax();
-
-            U = HbyA
-              + rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rhorAUf);
+            U = HbyA + rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rAUf);
             U.correctBoundaryConditions();
             fvOptions.correct(U);
-            K = 0.5*magSqr(U);
         }
     }
 
     p = p_rgh + rho*gh;
 
-}
-
-pressureControl.limit(p);
-
-// For closed-volume cases adjust the pressure and density levels
-// to obey overall mass continuity
-if (closedVolume)
-{
-    if (!compressible)
+    if (p_rgh.needReference())
     {
         p += dimensionedScalar
         (
@@ -94,29 +61,8 @@ if (closedVolume)
             p.dimensions(),
             pRefValue - getRefCellValue(p, pRefCell)
         );
-    }
-    else
-    {
-        p += (initialMass - fvc::domainIntegrate(psi*p))
-            /compressibility;
-        thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
-        rho = thermo.rho();
         p_rgh = p - rho*gh;
-        p_rgh.correctBoundaryConditions();
     }
-}
-else
-{
-    thermo.correctRho(psi*p - psip0,  rhoMin, rhoMax);
-}
-
-#include "rhoEqn.H"
-#include "compressibleContinuityErrors.H"
-
-rho = thermo.rho();
-
-// Update pressure time derivative if needed
-if (thermo.dpdt())
-{
-    dpdt = fvc::ddt(p);
+    
+    #include "continuityError.H"
 }

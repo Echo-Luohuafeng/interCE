@@ -1,21 +1,14 @@
-{
-    dimensionedScalar totalMass = fvc::domainIntegrate(rho);
+volScalarField contErr(fvc::div(phi) - vDotc - vDotv );
 
-    scalar sumLocalContErr =
-    (
-        fvc::domainIntegrate(mag(rho - thermo.rho()))/totalMass
-    ).value();
+scalar sumLocalContErr = runTime.deltaTValue()*
+    mag(contErr)().weightedAverage(mesh.V()).value();
 
-    scalar globalContErr =
-    (
-        fvc::domainIntegrate(rho - thermo.rho())/totalMass
-    ).value();
+scalar globalContErr = runTime.deltaTValue()*
+    contErr.weightedAverage(mesh.V()).value();
 
-    cumulativeContErr[i] += globalContErr;
+cumulativeContErr += globalContErr;
 
-    Info<< "time step continuity errors (" << mesh.name() << ")"
-        << ": sum local = " << sumLocalContErr
-        << ", global = " << globalContErr
-        << ", cumulative = " << cumulativeContErr[i]
-        << endl;
-}
+Info<< "time step continuity errors : sum local = " << sumLocalContErr
+    << ", global = " << globalContErr
+    << ", cumulative = " << cumulativeContErr
+    << endl;
