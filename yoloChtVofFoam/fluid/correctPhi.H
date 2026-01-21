@@ -3,8 +3,8 @@ CorrectPhi
     U,
     phi,
     p_rgh,
-    surfaceScalarField("rAUf", fvc::interpolate(rAU())),
-    geometricZeroField(),
+    surfaceScalarField("rAUf", fvc::interpolate(rAU)),
+    absDivU,
     pimple
 );
 

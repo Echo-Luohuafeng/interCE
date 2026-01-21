@@ -13,11 +13,11 @@ forAll(cumulativeContErrIO, i)
                 "cumulativeContErr",
                 runTime.timeName(),
                 "uniform",
-                mesh.thisDb(),
+                mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            dimensionedScalar(word::null, dimless, Zero)
+            dimensionedScalar(dimless, Zero)
         )
     );
 }

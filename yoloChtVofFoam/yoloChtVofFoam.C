@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 
             forAll(fluidRegions, i)
             {
-                fvMesh& mesh = fluidRegions[i];
+                dynamicFvMesh& mesh = fluidRegions[i];
 
                 #include "readFluidMultiRegionPIMPLEControls.H"
                 #include "setRegionFluidFields.H"

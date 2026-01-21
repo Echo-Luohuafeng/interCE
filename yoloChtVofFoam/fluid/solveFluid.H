@@ -1,42 +1,8 @@
-if (oCorr == 0 )
+if (oCorr == 0 || moveMeshOuterCorrectors)
 {
+    //- Store divergence of U from unrefined mesh
     volScalarField divU("divU", fvc::div(fvc::absolute(phi, U)));
-
-    mesh.update();
-
-    if (mesh.changing())
-    {
-        // Do not apply previous time-step mesh compression flux
-        // if the mesh topology changed
-        if (mesh.topoChanging())
-        {
-            talphaPhi1Corr0.clear();
-        }
-
-        gh = (g & mesh.C()) - ghRef;
-        ghf = (g & mesh.Cf()) - ghRef;
-
-        MRF.update();
-
-        if (correctPhi)
-        {
-            // Calculate absolute flux
-            // from the mapped surface velocity
-            phi = mesh.Sf() & Uf();
-
-            #include "correctPhi.H"
-
-            // Make the flux relative to the mesh motion
-            fvc::makeRelative(phi, U);
-        }
-
-        if (checkMeshCourantNo)
-        {
-            #include "meshCourantNo.H"
-        }
-    }
 }
-
 
 if (finalIter)
 {
@@ -45,11 +11,11 @@ if (finalIter)
 
 if (frozenFlow)
 {
-    continue;
+    #include "TEqn.H"
 }
 else
 {
-    mixture->correct();
+    mixture.correct();
 
     #include "alphaControls.H"
     #include "alphaEqnSubCycle.H"
@@ -60,20 +26,26 @@ else
     #include "TEqn.H"
 
     // --- Pressure corrector loop
-    while (pimple.correct())
+    for (int corr=0; corr<nCorr; corr++)
     {
         #include "pEqn.H"
     }
 
-    if (pimple.turbCorr())
-    {
-        turbulence->correct();
-    }
+    
+    turbulence.correct();
+    
     
     rho = alpha1*rho1 + alpha2*rho2;
+}
+
+
+if(computeFluxes)
+{
+    #include "computeFluidHeatFluxes.H"
 }
 
 if (finalIter)
 {
     mesh.data().setFinalIteration(false);
+
 }

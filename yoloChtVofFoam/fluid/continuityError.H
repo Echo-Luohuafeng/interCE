@@ -1,14 +1,7 @@
 
-// volScalarField contErr(fvc::ddt(rho) + fvc::div(rhoPhi));
+volScalarField contErr(fvc::ddt(rho) + fvc::div(rhoPhi));
 
-
-// Pair<tmp<volScalarField>> vDot = mixture->vDot();
-// const volScalarField& vDotc = vDot[0]();
-// const volScalarField& vDotv = vDot[1]();
-
-
-
-volScalarField contErr(fvc::div(phi) - vDotc - vDotv );
+//volScalarField contErr(fvc::div(phi) - vDotCond + vDotEvap);
 
 scalar sumLocalContErr = runTime.deltaTValue()*
     mag(contErr)().weightedAverage(mesh.V()).value();
