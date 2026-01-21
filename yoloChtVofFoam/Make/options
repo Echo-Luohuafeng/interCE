@@ -26,9 +26,8 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
-    -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
-    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude
-
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
@@ -49,12 +48,13 @@ EXE_LIBS = \
     -lradiationModels \
     -lregionModels \
     -lregionFaModels \
-    -lfiniteArea \ 
+    -lfiniteArea \
     -L$(FOAM_USER_LIBBIN) \
     -lyoloInterfaceProperties \
     -ldynamicFvMesh \
     -lyoloPhaseTemperatureChangeTwoPhaseMixtures \
     -ltwoPhaseMixture \
     -ltwoPhaseProperties \
-    -lturbulenceModels \
-    -lfluidThermophysicalModels
+    -lyoloInterfaceProperties \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModels
