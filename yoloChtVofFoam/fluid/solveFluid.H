@@ -1,3 +1,43 @@
+if (pimple.firstIter() || moveMeshOuterCorrectors)
+{
+    volScalarField divU("divU", fvc::div(fvc::absolute(phi, U)));
+
+    mesh.update();
+
+    if (mesh.changing())
+    {
+        // Do not apply previous time-step mesh compression flux
+        // if the mesh topology changed
+        if (mesh.topoChanging())
+        {
+            talphaPhi1Corr0.clear();
+        }
+
+        gh = (g & mesh.C()) - ghRef;
+        ghf = (g & mesh.Cf()) - ghRef;
+
+        MRF.update();
+
+        if (correctPhi)
+        {
+            // Calculate absolute flux
+            // from the mapped surface velocity
+            phi = mesh.Sf() & Uf();
+
+            #include "correctPhi.H"
+
+            // Make the flux relative to the mesh motion
+            fvc::makeRelative(phi, U);
+        }
+
+        if (checkMeshCourantNo)
+        {
+            #include "meshCourantNo.H"
+        }
+    }
+}
+
+
 if (finalIter)
 {
     mesh.data().setFinalIteration(true);
@@ -5,33 +45,32 @@ if (finalIter)
 
 if (frozenFlow)
 {
-    #include "EEqn.H"
+    continue;
 }
 else
 {
-    if (oCorr == 0)
-    {
-        #include "rhoEqn.H"
-    }
+    mixture->correct();
+
+    #include "alphaControls.H"
+    #include "alphaEqnSubCycle.H"
+
+    interface.correct();
 
     #include "UEqn.H"
-    #include "YEqn.H"
-    #include "EEqn.H"
+    #include "TEqn.H"
 
-    if (!coupled)
+    // --- Pressure corrector loop
+    while (pimple.correct())
     {
-        Info<< "\nSolving for fluid region " << fluidRegions[i].name() << endl;
-
-        // --- PISO loop
-        for (int corr=0; corr<nCorr; corr++)
-        {
-            #include "pEqn.H"
-        }
-
-        turbulence.correct();
-
-        rho = thermo.rho();
+        #include "pEqn.H"
     }
+
+    if (pimple.turbCorr())
+    {
+        turbulence->correct();
+    }
+    
+    rho = alpha1*rho1 + alpha2*rho2;
 }
 
 if (finalIter)
